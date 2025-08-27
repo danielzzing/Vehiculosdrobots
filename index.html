@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Portal de Revisión de Vehículos</title>
     <style>
         * {
@@ -314,31 +317,247 @@
             font-size: 1.2em;
         }
 
-        @media (max-width: 768px) {
+        /* Responsive Design - Mobile First */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                margin: 0;
+                border-radius: 10px;
+                min-height: 100vh;
+            }
+
+            .header {
+                padding: 15px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.4em;
+                line-height: 1.3;
+                margin-bottom: 5px;
+            }
+
+            .header p {
+                font-size: 0.9em;
+                margin-bottom: 0;
+            }
+
+            .form-container {
+                padding: 15px;
+            }
+
+            .form-section {
+                margin-bottom: 25px;
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .form-section h2 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 15px;
+                font-size: 16px;
+                border-radius: 8px;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
+
+            /* Fix for iOS zoom on input focus */
+            .form-group input[type="text"],
+            .form-group input[type="date"],
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+                transform-origin: left top;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .checkbox-item {
+                padding: 15px 10px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                min-height: auto;
+            }
+
+            .checkbox-item input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                margin-right: 10px;
+            }
+
+            .checkbox-item label {
+                font-size: 14px;
+                line-height: 1.4;
+                cursor: pointer;
+                flex: 1;
+            }
+
+            .status-buttons {
+                display: flex;
+                gap: 5px;
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .status-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                border-radius: 15px;
+                min-width: 70px;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .image-upload {
+                padding: 20px;
+                font-size: 14px;
+            }
+
+            .image-preview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .image-preview img {
+                height: 120px;
+            }
+
+            .observations {
+                min-height: 100px;
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+                margin-top: 30px;
+            }
+
+            .btn {
+                padding: 18px 20px;
+                font-size: 16px;
+                width: 100%;
+                min-width: auto;
+                border-radius: 12px;
+            }
+
+            /* Touch-friendly enhancements */
+            .checkbox-item {
+                min-height: 44px;
+                cursor: pointer;
+            }
+
+            .status-btn {
+                min-height: 44px;
+                min-width: 90px;
+            }
+
+            /* Prevent horizontal scroll */
+            .container * {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            /* Improve text readability */
+            .form-section h2 .icon {
+                display: block;
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
             .container {
                 margin: 10px;
                 border-radius: 15px;
             }
 
             .header {
-                padding: 20px;
+                padding: 25px;
             }
 
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
 
             .form-container {
-                padding: 20px;
+                padding: 25px;
             }
 
             .checkbox-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .checkbox-item {
+                padding: 18px 15px;
             }
 
             .action-buttons {
                 flex-direction: column;
                 align-items: center;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .image-preview {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 769px) {
+            .checkbox-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .checkbox-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .form-group input,
+            .form-group select {
+                -webkit-appearance: none;
+                border-radius: 8px;
+            }
+        }
+
+        /* Android Chrome specific fixes */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            .form-group select {
+                background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 12px;
             }
         }
 
@@ -488,8 +707,10 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'checkbox-item';
                 itemDiv.innerHTML = `
-                    <input type="checkbox" id="${item.id}" name="${item.id}">
-                    <label for="${item.id}">${item.label}</label>
+                    <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                        <input type="checkbox" id="${item.id}" name="${item.id}">
+                        <label for="${item.id}" style="flex: 1; cursor: pointer;">${item.label}</label>
+                    </div>
                     <div class="status-buttons">
                         <button type="button" class="status-btn good" onclick="setStatus('${item.id}', 'good')">✅ Bueno</button>
                         <button type="button" class="status-btn warning" onclick="setStatus('${item.id}', 'warning')">⚠️ Regular</button>
@@ -532,6 +753,45 @@
             
             // Submit del formulario
             form.addEventListener('submit', handleFormSubmit);
+
+            // Mejorar experiencia táctil en móviles
+            if ('ontouchstart' in window) {
+                // Agregar eventos táctiles para mejor UX móvil
+                document.querySelectorAll('.checkbox-item').forEach(item => {
+                    item.addEventListener('touchstart', function() {
+                        this.style.transform = 'scale(0.98)';
+                    });
+                    
+                    item.addEventListener('touchend', function() {
+                        this.style.transform = 'scale(1)';
+                    });
+                });
+
+                // Prevenir zoom en inputs para iOS
+                document.querySelectorAll('input[type="text"], input[type="date"], select, textarea').forEach(input => {
+                    input.addEventListener('focus', function() {
+                        if (window.innerWidth < 768) {
+                            document.querySelector('meta[name="viewport"]').setAttribute('content', 
+                                'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                        }
+                    });
+                    
+                    input.addEventListener('blur', function() {
+                        document.querySelector('meta[name="viewport"]').setAttribute('content', 
+                            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                    });
+                });
+            }
+
+            // Mejorar accesibilidad
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox' && !e.target.classList.contains('status-btn')) {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.click();
+                    }
+                });
+            });
         }
 
         // Establecer fecha actual
