@@ -888,7 +888,7 @@
         }
 
         // Descargar PDF
-        function downloadPDF() {
+        async function downloadPDF() {
             const data = collectFormData();
             if (!data.operatorName || !data.vehicle) {
                 alert('Por favor completa los campos obligatorios antes de generar el PDF.');
@@ -897,56 +897,207 @@
 
             showLoading();
             
-            setTimeout(() => {
+            try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
                 // Configuración inicial
                 doc.setFontSize(20);
-                doc.text('Reporte de Revisión de Vehículo', 20, 30);
+                doc.setTextColor(44, 62, 80);
+                doc.text('REPORTE DE REVISIÓN DE VEHÍCULO', 20, 30);
                 
-                doc.setFontSize(12);
-                doc.text(`Operador: ${data.operatorName}`, 20, 50);
-                doc.text(`Fecha: ${data.inspectionDate}`, 20, 60);
-                doc.text(`Vehículo: ${data.vehicle}`, 20, 70);
+                // Línea separadora
+                doc.setDrawColor(52, 152, 219);
+                doc.setLineWidth(0.5);
+                doc.line(20, 35, 190, 35);
+                
+                // Información general
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text('INFORMACIÓN GENERAL', 20, 50);
+                
+                doc.setFontSize(11);
+                doc.text(`Operador: ${data.operatorName}`, 25, 60);
+                doc.text(`Fecha de Revisión: ${data.inspectionDate}`, 25, 68);
+                doc.text(`Vehículo: ${data.vehicle}`, 25, 76);
+                doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, 25, 84);
                 
                 // Checklist
                 doc.setFontSize(14);
-                doc.text('Checklist de Revisión:', 20, 90);
+                doc.setTextColor(44, 62, 80);
+                doc.text('CHECKLIST DE REVISIÓN', 20, 100);
                 
-                let yPos = 100;
+                let yPos = 110;
+                let itemCount = 0;
+                
                 Object.entries(data.checklist).forEach(([key, value]) => {
                     const item = checklistItems.find(item => item.id === key);
                     if (item) {
-                        const status = value.status === 'good' ? '✓ Bueno' : 
-                                     value.status === 'warning' ? '⚠ Regular' : '✗ Malo';
-                        doc.setFontSize(10);
-                        doc.text(`${item.label}: ${status}`, 25, yPos);
-                        yPos += 8;
+                        itemCount++;
                         
-                        if (yPos > 250) {
+                        // Verificar si necesitamos nueva página
+                        if (yPos > 260) {
                             doc.addPage();
                             yPos = 30;
                         }
+                        
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 0, 0);
+                        
+                        // Indicador visual de estado
+                        let statusIcon, statusColor;
+                        if (value.status === 'good') {
+                            statusIcon = '✓';
+                            statusColor = [39, 174, 96]; // Verde
+                        } else if (value.status === 'warning') {
+                            statusIcon = '⚠';
+                            statusColor = [243, 156, 18]; // Amarillo
+                        } else {
+                            statusIcon = '✗';
+                            statusColor = [231, 76, 60]; // Rojo
+                        }
+                        
+                        doc.setTextColor(...statusColor);
+                        doc.text(statusIcon, 25, yPos);
+                        
+                        doc.setTextColor(0, 0, 0);
+                        const statusText = value.status === 'good' ? 'BUENO' : 
+                                         value.status === 'warning' ? 'REGULAR' : 'MALO';
+                        
+                        doc.text(`${item.label}: ${statusText}`, 35, yPos);
+                        yPos += 8;
                     }
                 });
 
                 // Observaciones
-                if (data.observations) {
+                if (data.observations && data.observations.trim()) {
                     if (yPos > 200) {
                         doc.addPage();
                         yPos = 30;
                     }
+                    
                     doc.setFontSize(14);
-                    doc.text('Observaciones:', 20, yPos);
+                    doc.setTextColor(44, 62, 80);
+                    doc.text('OBSERVACIONES', 20, yPos);
+                    yPos += 10;
+                    
                     doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
                     const splitText = doc.splitTextToSize(data.observations, 170);
-                    doc.text(splitText, 20, yPos + 10);
+                    doc.text(splitText, 20, yPos);
+                    yPos += (splitText.length * 5) + 10;
                 }
 
-                doc.save(`revision_vehiculo_${data.operatorName}_${data.inspectionDate}.pdf`);
+                // AGREGAR IMÁGENES AL PDF
+                if (data.images && data.images.length > 0) {
+                    // Nueva página para imágenes si es necesario
+                    if (yPos > 150) {
+                        doc.addPage();
+                        yPos = 30;
+                    }
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(44, 62, 80);
+                    doc.text('EVIDENCIAS FOTOGRÁFICAS', 20, yPos);
+                    yPos += 15;
+                    
+                    let imageCount = 0;
+                    const imagesPerRow = 2;
+                    const imageWidth = 80;
+                    const imageHeight = 60;
+                    const margin = 10;
+                    
+                    for (let i = 0; i < data.images.length; i++) {
+                        const image = data.images[i];
+                        
+                        // Calcular posición
+                        const col = imageCount % imagesPerRow;
+                        const row = Math.floor(imageCount / imagesPerRow);
+                        
+                        const xPos = 20 + (col * (imageWidth + margin));
+                        const currentYPos = yPos + (row * (imageHeight + margin + 8));
+                        
+                        // Verificar si necesitamos nueva página
+                        if (currentYPos + imageHeight > 280) {
+                            doc.addPage();
+                            yPos = 30;
+                            imageCount = 0;
+                            const newCol = imageCount % imagesPerRow;
+                            const newRow = Math.floor(imageCount / imagesPerRow);
+                            const newXPos = 20 + (newCol * (imageWidth + margin));
+                            const newCurrentYPos = yPos + (newRow * (imageHeight + margin + 8));
+                            
+                            try {
+                                // Agregar imagen
+                                doc.addImage(image.data, 'JPEG', newXPos, newCurrentYPos, imageWidth, imageHeight);
+                                
+                                // Agregar nombre de archivo debajo de la imagen
+                                doc.setFontSize(8);
+                                doc.setTextColor(100, 100, 100);
+                                const fileName = image.name.length > 20 ? 
+                                    image.name.substring(0, 17) + '...' : image.name;
+                                doc.text(fileName, newXPos, newCurrentYPos + imageHeight + 5);
+                                
+                            } catch (error) {
+                                console.warn('Error al agregar imagen:', error);
+                                // Si hay error con la imagen, agregar texto indicativo
+                                doc.setFontSize(10);
+                                doc.setTextColor(200, 0, 0);
+                                doc.text('[Imagen no disponible]', newXPos, newCurrentYPos + 30);
+                                doc.text(image.name, newXPos, newCurrentYPos + 40);
+                            }
+                        } else {
+                            try {
+                                // Agregar imagen
+                                doc.addImage(image.data, 'JPEG', xPos, currentYPos, imageWidth, imageHeight);
+                                
+                                // Agregar nombre de archivo debajo de la imagen
+                                doc.setFontSize(8);
+                                doc.setTextColor(100, 100, 100);
+                                const fileName = image.name.length > 20 ? 
+                                    image.name.substring(0, 17) + '...' : image.name;
+                                doc.text(fileName, xPos, currentYPos + imageHeight + 5);
+                                
+                            } catch (error) {
+                                console.warn('Error al agregar imagen:', error);
+                                // Si hay error con la imagen, agregar texto indicativo
+                                doc.setFontSize(10);
+                                doc.setTextColor(200, 0, 0);
+                                doc.text('[Imagen no disponible]', xPos, currentYPos + 30);
+                                doc.text(image.name, xPos, currentYPos + 40);
+                            }
+                        }
+                        
+                        imageCount++;
+                        
+                        // Actualizar yPos para la siguiente fila de imágenes
+                        if (col === imagesPerRow - 1 || i === data.images.length - 1) {
+                            yPos = currentYPos + imageHeight + margin + 8;
+                        }
+                    }
+                }
+
+                // Pie de página en todas las páginas
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Página ${i} de ${pageCount}`, 20, 285);
+                    doc.text(`Sistema Digital de Bitácoras - ${new Date().getFullYear()}`, 120, 285);
+                }
+
+                // Generar y descargar PDF
+                const fileName = `revision_vehiculo_${data.operatorName.replace(/\s+/g, '_')}_${data.inspectionDate}.pdf`;
+                doc.save(fileName);
+                
                 hideLoading();
-            }, 1000);
+                
+            } catch (error) {
+                console.error('Error generando PDF:', error);
+                hideLoading();
+                alert('Error al generar el PDF. Por favor intenta nuevamente.');
+            }
         }
 
         // Descargar Excel
