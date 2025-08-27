@@ -649,9 +649,6 @@
                     <button type="button" class="btn btn-info" onclick="downloadExcel()">
                         📊 Descargar Excel
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        💾 Guardar Revisión
-                    </button>
                 </div>
             </form>
 
@@ -997,31 +994,11 @@
             }, 1000);
         }
 
-        // Manejar envío del formulario
+        // Manejar envío del formulario (ya no necesario, pero mantener por compatibilidad)
         function handleFormSubmit(e) {
             e.preventDefault();
-            const data = collectFormData();
-            
-            showLoading();
-            
-            // Simular guardado
-            setTimeout(() => {
-                alert('Revisión guardada exitosamente');
-                hideLoading();
-                
-                // Opcional: limpiar formulario
-                if (confirm('¿Deseas limpiar el formulario para una nueva revisión?')) {
-                    document.getElementById('inspectionForm').reset();
-                    uploadedImages = [];
-                    checklistData = {};
-                    displayImages();
-                    document.querySelectorAll('.checkbox-item').forEach(item => {
-                        item.classList.remove('checked');
-                        item.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
-                    });
-                    setCurrentDate();
-                }
-            }, 2000);
+            // Solo prevenir el comportamiento por defecto
+            return false;
         }
 
         function showLoading() {
