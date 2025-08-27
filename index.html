@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Revisión de Vehículos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.03) 10px,
+                rgba(255, 255, 255, 0.03) 20px
+            );
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-100px) translateY(-100px); }
+            100% { transform: translateX(100px) translateY(100px); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e8f4f8;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-item.checked {
+            background: #e8f6f3;
+            border-color: #27ae60;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .status-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .status-btn.good {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-btn.warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-btn.bad {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .status-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-upload {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: #f0f8ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-upload:hover {
+            border-color: #2980b9;
+            background: #e6f3ff;
+        }
+
+        .image-upload.dragover {
+            background: #d5e8ff;
+            transform: scale(1.02);
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview img:hover {
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .observations {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Portal de Revisión de Vehículos</h1>
+            <p>Sistema Digital de Bitácoras - Flotilla Empresarial</p>
+        </div>
+
+        <div class="form-container">
+            <form id="inspectionForm">
+                <!-- Información General -->
+                <div class="form-section">
+                    <h2><span class="icon">👤</span> Información General</h2>
+                    <div class="form-group">
+                        <label for="operatorName">Nombre del Operador:</label>
+                        <input type="text" id="operatorName" name="operatorName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inspectionDate">Día de Revisión:</label>
+                        <input type="date" id="inspectionDate" name="inspectionDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle">Vehículo:</label>
+                        <select id="vehicle" name="vehicle" required>
+                            <option value="">Seleccionar vehículo...</option>
+                            <option value="2019 Nissan NP300 Dob. Cab. SE">2019 Nissan NP300 Dob. Cab. SE</option>
+                            <option value="2018 Toyota Hilux D Dob. Cab.">2018 Toyota Hilux D Dob. Cab.</option>
+                            <option value="2018 Nissan NP300 PK L4 AC DH">2018 Nissan NP300 PK L4 AC DH</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Check List de Revisión -->
+                <div class="form-section">
+                    <h2><span class="icon">✅</span> Check List de Revisión</h2>
+                    <div class="checkbox-grid" id="checklistGrid">
+                        <!-- Los elementos se generarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Adjuntar Evidencias -->
+                <div class="form-section">
+                    <h2><span class="icon">📸</span> Evidencias Fotográficas</h2>
+                    <div class="image-upload" id="imageUpload">
+                        <p>📷 Arrastra imágenes aquí o haz clic para seleccionar</p>
+                        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="form-section">
+                    <h2><span class="icon">📝</span> Observaciones Adicionales</h2>
+                    <div class="form-group">
+                        <label for="observations">Comentarios y observaciones:</label>
+                        <textarea id="observations" name="observations" class="observations" placeholder="Describe cualquier anomalía, reparación necesaria o comentario adicional..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-success" onclick="downloadPDF()">
+                        📄 Descargar PDF
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="downloadExcel()">
+                        📊 Descargar Excel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Guardar Revisión
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Procesando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Elementos del checklist
+        const checklistItems = [
+            { id: 'oil_level', label: 'Nivel de aceite del motor', category: 'motor' },
+            { id: 'coolant_level', label: 'Nivel de refrigerante', category: 'motor' },
+            { id: 'brake_fluid', label: 'Líquido de frenos', category: 'seguridad' },
+            { id: 'tire_condition', label: 'Estado general de llantas', category: 'llantas' },
+            { id: 'tire_pressure', label: 'Presión de llantas', category: 'llantas' },
+            { id: 'tire_tread', label: 'Profundidad de banda de rodadura', category: 'llantas' },
+            { id: 'body_damage', label: 'Daños en carrocería', category: 'exterior' },
+            { id: 'paint_scratches', label: 'Rayones en pintura', category: 'exterior' },
+            { id: 'lights_function', label: 'Funcionamiento de luces', category: 'electrico' },
+            { id: 'engine_performance', label: 'Funcionamiento del motor', category: 'motor' },
+            { id: 'transmission', label: 'Funcionamiento de transmisión', category: 'motor' },
+            { id: 'brakes', label: 'Sistema de frenos', category: 'seguridad' },
+            { id: 'steering', label: 'Dirección y suspensión', category: 'seguridad' },
+            { id: 'battery', label: 'Estado de batería', category: 'electrico' },
+            { id: 'windshield', label: 'Parabrisas y cristales', category: 'exterior' },
+            { id: 'mirrors', label: 'Espejos retrovisores', category: 'exterior' },
+            { id: 'interior_clean', label: 'Limpieza interior', category: 'interior' },
+            { id: 'seatbelts', label: 'Cinturones de seguridad', category: 'seguridad' },
+            { id: 'documents', label: 'Documentación del vehículo', category: 'documentos' },
+            { id: 'emergency_kit', label: 'Kit de emergencia', category: 'seguridad' }
+        ];
+
+        let uploadedImages = [];
+        let checklistData = {};
+
+        // Inicializar la aplicación
+        function initApp() {
+            generateChecklist();
+            setupEventListeners();
+            setCurrentDate();
+        }
+
+        // Generar el checklist dinámicamente
+        function generateChecklist() {
+            const grid = document.getElementById('checklistGrid');
+            
+            checklistItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'checkbox-item';
+                itemDiv.innerHTML = `
+                    <input type="checkbox" id="${item.id}" name="${item.id}">
+                    <label for="${item.id}">${item.label}</label>
+                    <div class="status-buttons">
+                        <button type="button" class="status-btn good" onclick="setStatus('${item.id}', 'good')">✅ Bueno</button>
+                        <button type="button" class="status-btn warning" onclick="setStatus('${item.id}', 'warning')">⚠️ Regular</button>
+                        <button type="button" class="status-btn bad" onclick="setStatus('${item.id}', 'bad')">❌ Malo</button>
+                    </div>
+                `;
+                grid.appendChild(itemDiv);
+
+                // Agregar event listener para el checkbox
+                const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        itemDiv.classList.add('checked');
+                        if (!checklistData[item.id]) {
+                            checklistData[item.id] = { checked: true, status: 'good' };
+                            setStatus(item.id, 'good');
+                        }
+                    } else {
+                        itemDiv.classList.remove('checked');
+                        delete checklistData[item.id];
+                        clearStatus(item.id);
+                    }
+                });
+            });
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            const imageUpload = document.getElementById('imageUpload');
+            const imageInput = document.getElementById('imageInput');
+            const form = document.getElementById('inspectionForm');
+
+            // Drag and drop para imágenes
+            imageUpload.addEventListener('dragover', handleDragOver);
+            imageUpload.addEventListener('drop', handleDrop);
+            imageUpload.addEventListener('click', () => imageInput.click());
+            
+            // Input de imágenes
+            imageInput.addEventListener('change', handleFileSelect);
+            
+            // Submit del formulario
+            form.addEventListener('submit', handleFormSubmit);
+        }
+
+        // Establecer fecha actual
+        function setCurrentDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inspectionDate').value = today;
+        }
+
+        // Manejar estado de checklist
+        function setStatus(itemId, status) {
+            const checkbox = document.getElementById(itemId);
+            if (!checkbox.checked) {
+                checkbox.checked = true;
+                checkbox.closest('.checkbox-item').classList.add('checked');
+            }
+
+            checklistData[itemId] = { checked: true, status: status };
+
+            // Actualizar botones visuales
+            const item = checkbox.closest('.checkbox-item');
+            const buttons = item.querySelectorAll('.status-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            item.querySelector(`.status-btn.${status}`).classList.add('active');
+        }
+
+        // Limpiar estado
+        function clearStatus(itemId) {
+            const item = document.getElementById(itemId).closest('.checkbox-item');
+            const buttons = item.querySelectorAll('.status-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+        }
+
+        // Manejo de archivos
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            processFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImages.push({
+                        name: file.name,
+                        data: e.target.result,
+                        size: file.size
+                    });
+                    displayImages();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayImages() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            uploadedImages.forEach((img, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = img.data;
+                imgElement.title = img.name;
+                imgElement.onclick = () => removeImage(index);
+                preview.appendChild(imgElement);
+            });
+        }
+
+        function removeImage(index) {
+            if (confirm('¿Eliminar esta imagen?')) {
+                uploadedImages.splice(index, 1);
+                displayImages();
+            }
+        }
+
+        // Recopilar datos del formulario
+        function collectFormData() {
+            return {
+                operatorName: document.getElementById('operatorName').value,
+                inspectionDate: document.getElementById('inspectionDate').value,
+                vehicle: document.getElementById('vehicle').value,
+                checklist: checklistData,
+                observations: document.getElementById('observations').value,
+                images: uploadedImages,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // Descargar PDF
+        function downloadPDF() {
+            const data = collectFormData();
+            if (!data.operatorName || !data.vehicle) {
+                alert('Por favor completa los campos obligatorios antes de generar el PDF.');
+                return;
+            }
+
+            showLoading();
+            
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Configuración inicial
+                doc.setFontSize(20);
+                doc.text('Reporte de Revisión de Vehículo', 20, 30);
+                
+                doc.setFontSize(12);
+                doc.text(`Operador: ${data.operatorName}`, 20, 50);
+                doc.text(`Fecha: ${data.inspectionDate}`, 20, 60);
+                doc.text(`Vehículo: ${data.vehicle}`, 20, 70);
+                
+                // Checklist
+                doc.setFontSize(14);
+                doc.text('Checklist de Revisión:', 20, 90);
+                
+                let yPos = 100;
+                Object.entries(data.checklist).forEach(([key, value]) => {
+                    const item = checklistItems.find(item => item.id === key);
+                    if (item) {
+                        const status = value.status === 'good' ? '✓ Bueno' : 
+                                     value.status === 'warning' ? '⚠ Regular' : '✗ Malo';
+                        doc.setFontSize(10);
+                        doc.text(`${item.label}: ${status}`, 25, yPos);
+                        yPos += 8;
+                        
+                        if (yPos > 250) {
+                            doc.addPage();
+                            yPos = 30;
+                        }
+                    }
+                });
+
+                // Observaciones
+                if (data.observations) {
+                    if (yPos > 200) {
+                        doc.addPage();
+                        yPos = 30;
+                    }
+                    doc.setFontSize(14);
+                    doc.text('Observaciones:', 20, yPos);
+                    doc.setFontSize(10);
+                    const splitText = doc.splitTextToSize(data.observations, 170);
+                    doc.text(splitText, 20, yPos + 10);
+                }
+
+                doc.save(`revision_vehiculo_${data.operatorName}_${data.inspectionDate}.pdf`);
+                hideLoading();
+            }, 1000);
+        }
+
+        // Descargar Excel
+        function downloadExcel() {
+            const data = collectFormData();
+            if (!data.operatorName || !data.vehicle) {
+                alert('Por favor completa los campos obligatorios antes de generar el Excel.');
+                return;
+            }
+
+            showLoading();
+            
+            setTimeout(() => {
+                const workbook = XLSX.utils.book_new();
+                
+                // Hoja de información general
+                const generalData = [
+                    ['Campo', 'Valor'],
+                    ['Operador', data.operatorName],
+                    ['Fecha', data.inspectionDate],
+                    ['Vehículo', data.vehicle],
+                    ['Observaciones', data.observations]
+                ];
+                
+                // Hoja de checklist
+                const checklistData = [['Elemento', 'Estado', 'Revisado']];
+                checklistItems.forEach(item => {
+                    const checked = data.checklist[item.id];
+                    checklistData.push([
+                        item.label,
+                        checked ? (checked.status === 'good' ? 'Bueno' : 
+                                  checked.status === 'warning' ? 'Regular' : 'Malo') : 'No revisado',
+                        checked ? 'Sí' : 'No'
+                    ]);
+                });
+
+                const generalSheet = XLSX.utils.aoa_to_sheet(generalData);
+                const checklistSheet = XLSX.utils.aoa_to_sheet(checklistData);
+                
+                XLSX.utils.book_append_sheet(workbook, generalSheet, 'Información General');
+                XLSX.utils.book_append_sheet(workbook, checklistSheet, 'Checklist');
+                
+                XLSX.writeFile(workbook, `revision_vehiculo_${data.operatorName}_${data.inspectionDate}.xlsx`);
+                hideLoading();
+            }, 1000);
+        }
+
+        // Manejar envío del formulario
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const data = collectFormData();
+            
+            showLoading();
+            
+            // Simular guardado
+            setTimeout(() => {
+                alert('Revisión guardada exitosamente');
+                hideLoading();
+                
+                // Opcional: limpiar formulario
+                if (confirm('¿Deseas limpiar el formulario para una nueva revisión?')) {
+                    document.getElementById('inspectionForm').reset();
+                    uploadedImages = [];
+                    checklistData = {};
+                    displayImages();
+                    document.querySelectorAll('.checkbox-item').forEach(item => {
+                        item.classList.remove('checked');
+                        item.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
+                    });
+                    setCurrentDate();
+                }
+            }, 2000);
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
